@@ -1,0 +1,121 @@
+# Finding optimal strategies in repeated prisoner's dilemma using heuristics
+
+This project uses a heuristic to develop finite state machines (FSM) to find the optimal strategy in the repeated
+prisoner's dilemma.
+
+## Introduction & Background
+
+### Definition of the Repeated Prisoner's Dilemma game
+The Prisoner's dilemma is a popular game used and studied in game theory. It works as follows: Two prisoner's are
+interrogated in separate rooms by each the investigator. The investigators have enough evidence to convict the felons 
+for *A* amount of years, however they suspect the criminals have done more than what they can prove. They know they can
+convict the felons of one or both witness against the other. However, they will be granted reduced sentences for
+their cooperation with the police if they witness. There are thus four outcomes of the game: (1) If they are both silent
+each receive a sentence of *A* years; (2) if one defects and one cooperates the defecting felon receives *B* years and
+the cooperating felon receives *C* years; and (3) both defect and receive sentences of *D* years. Usually *B* < *A* <
+*D* < *C*.
+
+In the Repeated Prisoner's Dilemma this is repeated for *x* amount of turns, accumulating sentences and at each turn the
+felons are informed of the decision of their buddy to defect or cooperate. The goal is to accumulate as low a sentence
+as possible after *x* turns.
+
+### Formulating winning strategies using finite state machines
+There are several strategies for the prisoner's dilemma. Two obvious ones are to always cooperate or always defect and
+cross your fingers and hope for the best. More sophisticated ones are called tit-for-tat always doing what the buddy did
+in the previous one. Another variant is to always cooperate unless the buddy defects at which point the strategy is to
+always defect no matter what. One variant of this is to at some point after a defect start cooperating again until the
+buddy defects again. The level of sophistication can be increased indefinitely of course. But how do we represent these
+strategies in a succinct data structure? Enter finite state machines (FSM).
+
+The mathematical definition of a state machine is a five-tuple (sigma, S, s0, lambda, F) where sigma is the input
+alphabet, S is a set of states, s0 is the initial state, lambda is the state transition function, sigma x S -> S, and F
+is the set of finite states. In our example however, we will use something called a finite state transducer (FST) which is a
+six-tuple (sigma, gamma, S, s0, lambda, omega), where gamma is the output alphabet and omega is the output function, 
+sigma x S -> gamma. In our case the input is the decision of the buddy in the previous round, gamma is
+{defect, cooperate}, S is a set of states, s0 is a state taken from S, and omega decides wether to cooperate or defect
+that round. Thus every strategy can be represented as ({0, 1}, {0, 1}, S, s0, lambda, omega).
+
+### Using heuristics to develop winning strategies
+Representing strategies as FSTs makes developing new strategies easy, at least conceptually.
+To modify an existing strategy one can simply add a state to S, remove a state from S, change lambda, or change omega. 
+We keep s0 constant. This means we should be able to apply heuristics to existing strategies to improve them. We will
+be using at least one heuristic in this project, possibly expanding it.
+
+### General layout of the code
+There will be mainly three classes, PrisonersDilemmaSimulation.Kt, responsible for running the Repeated Prisoner's
+Dilemma given two strategies; StateMachine.Kt, representing the strategies; and [Name of heuristic].Kt, which will be
+responsible for modifying the strategies, keeping scores, and tallying strategies against each other by calling
+PrisonersDilemma.Kt.
+
+### Evolutionary Program as first heuristic
+We will use an Evolutionary Programming (EP) heuristic to develop our strategies. The reasons for this is that (from 
+most to least important) it is an optimization problem where the objective value space depends on the other strategies
+present and thus changes over time. This is precisely the domain for which evolutionary and genetic algorithms were
+intended for. The reason for not using a Genetic algorithm is because we don't need to represent the finite state 
+transducers as linear strings so that they can be recombined. However, a Genetic algorithm implementation might be 
+developed at a later stage. It would indeed be interesting to partition the population into two parts, one part being
+developed through a genetic algorithm and the other through Evolutionary programming.
+
+## Implementation & execution
+
+### Details of Evolutionary Program
+There are several details that must be fleshed out before we can start an implementation. Here is a list of currently
+unresolved problems:
+- ~~In what ways can we mutate a FST?~~ See *Mutations* section
+- ~~How can we vary the severity of a mutation?~~ Adjusting severity parameter k in mutations
+- ~~How can we control the size of an FST?~~ We'll set a maximum allowed size and exclude mutations based on this.
+- ~~How should we tally strategies against each other?~~ All against all
+- ~~How should we pick strategies for the next generation?~~ Elitist to begin with.
+- ~~How can we guarantee valid solutions?~~ At least 1 vertex, a start output, every vertex has out-degree 2, every
+ pair of out-edges of a vertex has a label (D, _) and a label (C, _).
+- ~~How should we guarantee feasible solutions?~~ Ensure that all states are reachable from start state.
+- ~~When should a strategy be subject to intensification and when should it be subject to diversification?~~ Fittest
+ individuals from previous generation will be subject to intensification and the least fit to diversification.
+- ~~How can we intensify a strategy and how can we diversify a strategy?~~ See *Varying mutation severity* section
+
+#### Mutations
+An FSM is a slightly modified digraph where every vertex has out-degree 2. Additionally we will require that all
+states should be reachable through a DFS from the start state. We must mutate the graph such that this invariant
+still holds. Here is a list of the different mutations that will maintain this invariant:
+- Flip output of *k* edges (include initial output)
+- Pair-wise swap the out-edges of *k* vertices.
+- If a vertex *u* has *n* (*n* > 1) paths from the start vertex then pick the next to last vertex from *k* (*k* < *n*) 
+of these paths and make its edge to *u* point to another randomly chosen vertex (including itself).
+- Do the same for SCCs.
+- Pick *k* edges between different SCCs and change the edges' target vertices to another vertex inside the same SCC.
+- Change the target of *k* self-loops.
+- Add *k* vertices *u*. For each one pick a vertex *v*, make *v*'s out-edge pointing to *w* point to *u*, and
+ make *u*'s edge point to *w* and the other one to an arbitrary vertex.
+- Reverse the edges in *k* cycles. Be careful to cover the set of inputs.
+- Pick *k* vertices that has at least as many in-edges as non-self-loop out-edges. For each such vertex *u*, delete
+ *u* and assign its in-edges to the vertices pointed at by *u*.
+- Do the same for SCCs.
+- Delete *k* vertices with only self-loops and reassign its in-edges.
+- Do topological sort on SCCs. Delete *n* SCC leaves of size *m* s.t. *n**m* <= *k* and reassign in-edges.
+
+#### Varying mutation severity
+I have been able to associate a parameter *k* to all mutations. Clearly, increasing *k* increases the severity of the
+mutations. It is natural to call this parameter the *severity parameter*. If we keep *k* constant across all
+mutations we can establish a ordering based on mutation severity. The ordering is: Changing output
+< changing edge target < deleting vertex = adding vertex. The introduction of the severity parameter and the ordering
+will be a way to include principles from adaptive neighborhood search.
+   
+#### Mutating to achieve desired behavior
+It is desirable to reason about how a mutation can change overall behavior and then to use this result to push an FST
+into a desirable direction through targeted mutation. This is a list of such reasonings:
+- An FST who is subject to frequent defects will probably increase its fitness the next turn if some of the edges
+cooperating is changed to instead defect.
+- If a set of states is associated with a high increase in cost, then deleting vertices, extensively changing its
+output, reducing connectivity with the rest of the FST, or extensively rearranging its internal connectivity will
+probably help.
+- An FST who frequently cooperates when other FSTs also cooperate will probably gain from defecting more
+
+## Results
+
+## Discussion
+
+### Artificial intelligence
+
+#### AI for automatic adjusting of mutation probability weights
+
+### Sorting mutation transformations based on degree of intensification
