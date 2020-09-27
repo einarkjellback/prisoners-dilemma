@@ -1,7 +1,12 @@
+package src
+
+import EvolutionaryProgram
+import PrisonersDilemma
+
 fun main() {
     val evolutionaryProgram = EvolutionaryProgram(prisonersDilemma = PrisonersDilemma())
     // TODO: Inject some well-known strategies into the initial population
-    val knownStrategies = PrisonersDilemma.getStrategies()
+    val knownStrategies = EvolutionaryProgram.getStrategyMachines()
     evolutionaryProgram.initialPopulation = knownStrategies.toMutableList()
     val GENERATIONS = 100
     (1..GENERATIONS).forEach { _ ->

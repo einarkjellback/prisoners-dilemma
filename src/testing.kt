@@ -1,6 +1,7 @@
+import io.mockk.every
+import io.mockk.spyk
+
 fun main() {
-    val lA = listOf(1, 2, 3)
-    val lB = listOf(lA)
-    println(System.identityHashCode(lA))
-    println(System.identityHashCode(lB))
+    val l = listOf(1, 2, 3, 4)
+    println(l.zipWithNext())
 }
