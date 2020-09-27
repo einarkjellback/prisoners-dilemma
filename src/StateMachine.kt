@@ -7,12 +7,12 @@ import java.util.*
  * consisting of an input alphabet, an output alphabet, a set of states (numbered 0 to n), a starting state, a
  * transition function, and an output function.
  */
-class StateMachine<I, O>(
+open class StateMachine<I, O>(
     val inputSet: Set<I>,
     val outputSet: Set<O>,
     var initOutput: O,
     private var nStates: Int
-) {
+) : Cloneable {
     init {
         when {
             inputSet.isEmpty() -> {
@@ -73,7 +73,7 @@ class StateMachine<I, O>(
         return initOutput
     }
 
-    fun copy(): StateMachine<I, O> {
+    override fun clone(): StateMachine<I, O> {
         return StateMachine(inputSet, outputSet, initOutput, nStates).also {
             it.transitionFunction = this.transitionFunction
         }
