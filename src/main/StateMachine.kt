@@ -60,16 +60,16 @@ open class StateMachine<I, O>(
         (0 until nStates).forEach { fromState ->
             inputSetCopy.forEach {
                 val (toState, output) = stateMachine.transitionFunction[fromState].getValue(it)
-                changeTransitionFunction(fromState, toState, it, output)
+                changeTransitionFunction(fromState, it, toState, output)
             }
         }
     }
 
-    fun changeTransitionFunction(fromState: Int, toState: Int, onInput: I, output: O) {
-        require(fromState in 0 until nStates && toState in 0 until nStates) { "State index out of bounds" }
+    fun changeTransitionFunction(fromState: Int, onInput: I, goToState: Int, output: O) {
+        require(fromState in 0 until nStates && goToState in 0 until nStates) { "State index out of bounds" }
         require(onInput in inputSet) { "onInput outside input set" }
         require(output in outputSet) { "Output outside output set" }
-        transitionFunction[fromState][onInput] = Pair(toState, output)
+        transitionFunction[fromState][onInput] = Pair(goToState, output)
     }
 
     fun transition(input: I): O {

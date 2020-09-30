@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.junit.runner.RunWith
 import main.PrisonersDilemma.Decision.*
 import io.mockk.*
+import main.PrisonersDilemma.*
 import java.lang.IllegalArgumentException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -15,6 +16,13 @@ import kotlin.test.fail
 
 @RunWith(JUnitParamsRunner::class)
 internal class EvolutionaryProgramTest {
+
+    val testPrisonerAgainstCorrectStrategy = { toTest: Prisoner, correct: Strategy ->
+        val randomInputs = listOf(null) + List(30) { listOf(COOP, DEFECT).random() }
+        randomInputs.forEach {
+            assertEquals(correct.next(it), toTest.next(it))
+        }
+    }
 
     @Test
     fun populationIsInitialPopulationAtGenerationZero() {
@@ -125,24 +133,27 @@ internal class EvolutionaryProgramTest {
     fun testTitForTat() {
         val titForTatToTest = EvolutionaryProgram.getTitForTat()
         val titForTatCorrect = PrisonersDilemma.getTitForTat()
-        val randomInputs = listOf(null) + List(30) { listOf(COOP, DEFECT).random() }
-        randomInputs.forEach {
-            assertEquals(titForTatCorrect.next(it), titForTatToTest.next(it))
-        }
+        testPrisonerAgainstCorrectStrategy(titForTatToTest, titForTatCorrect)
     }
 
     @Test
     fun testForgiving() {
-        fail("Not yet implemented")
+        val forgivingToTest = EvolutionaryProgram.getForgiving()
+        val forgivingCorrect = PrisonersDilemma.getForgiving()
+        testPrisonerAgainstCorrectStrategy(forgivingToTest, forgivingCorrect)
     }
 
     @Test
     fun testPunishing() {
-        fail("Not yet implemented")
+        val punishingToTest = EvolutionaryProgram.getPunishing()
+        val punishingCorrect = PrisonersDilemma.getPunishing()
+        testPrisonerAgainstCorrectStrategy(punishingToTest, punishingCorrect)
     }
 
     @Test
     fun testAlwaysDefect() {
-        fail("Not yet implemented")
+        val defectToTest = EvolutionaryProgram.getAlwaysDefect()
+        val defectCorrect = PrisonersDilemma.getAlwaysDefect()
+        testPrisonerAgainstCorrectStrategy(defectToTest, defectCorrect)
     }
 }

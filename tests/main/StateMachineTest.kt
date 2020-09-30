@@ -17,7 +17,7 @@ internal class StateMachineTest {
             inputSet.zip(outputSet).forEach {
                 val (input, output) = it
                 (0 until nStates).toMutableList().apply { add(0) }.zipWithNext().forEach { (from, to) ->
-                    this.changeTransitionFunction(from, to, input, output)
+                    this.changeTransitionFunction(from, input, to, output)
                 }
             }
         }
@@ -41,7 +41,7 @@ internal class StateMachineTest {
         makeMachine(defaultInput, defaultOutput, 1),  // Decreased number of states
         makeMachine(defaultInput, defaultOutput, 3),  // Increased number of states
         makeMachine(defaultInput, defaultOutput, defaultStates).apply {
-            changeTransitionFunction(1, 0, 1, 'b')
+            changeTransitionFunction(1, 1, 0, 'b')
         }  // Changed transition function entry
     )
 
@@ -93,10 +93,10 @@ internal class StateMachineTest {
         val nStates = 3
         val machine = StateMachine(setOf(1), setOf(1), 1, nStates)
         val cases = listOf(
-            { machine.changeTransitionFunction(0, nStates, 1, 1) },
-            { machine.changeTransitionFunction(nStates, 0, 1, 1) },
-            { machine.changeTransitionFunction(-1, 0, 1, 1) },
-            { machine.changeTransitionFunction(0, -1, 1, 1) }
+            { machine.changeTransitionFunction(0, 1, nStates, 1) },
+            { machine.changeTransitionFunction(nStates, 1, 0, 1) },
+            { machine.changeTransitionFunction(-1, 1, 0, 1) },
+            { machine.changeTransitionFunction(0, 1, -1, 1) }
         )
         cases.map {
             assertThrows(IllegalArgumentException::class.java) { it() }
@@ -131,16 +131,16 @@ internal class StateMachineTest {
     fun given_changeTransitionFunction_then_transitionFunctionUpdatesCorrectly() {
         val getMachine = {
             StateMachine(setOf(1, 2), setOf(3, 4), 3, 3).apply {
-                changeTransitionFunction(0, 0, 1, 3)
-                changeTransitionFunction(0, 1, 2, 4)
-                changeTransitionFunction(1, 2, 1, 4)
-                changeTransitionFunction(1, 0, 2, 4)
-                changeTransitionFunction(2, 0, 1, 3)
-                changeTransitionFunction(2, 0, 2, 3)
+                changeTransitionFunction(0, 1, 0, 3)
+                changeTransitionFunction(0, 2, 1, 4)
+                changeTransitionFunction(1, 1, 2, 4)
+                changeTransitionFunction(1, 2, 0, 4)
+                changeTransitionFunction(2, 1, 0, 3)
+                changeTransitionFunction(2, 2, 0, 3)
             }
         }
         val machineA = getMachine().apply { changeTransitionFunction(0, 1, 1, 3) }
-        val machineB = getMachine().apply { changeTransitionFunction(0, 0, 1, 4) }
+        val machineB = getMachine().apply { changeTransitionFunction(0, 1, 0, 4) }
 
         assertEquals(getMachine(), getMachine())
         assertEquals(machineA, machineA)
@@ -153,7 +153,7 @@ internal class StateMachineTest {
     fun given_outputNotInOutputSet_when_changeTransitionFunctionCalled_then_throwIAException() {
         val machine = StateMachine(setOf(1), setOf(1), 1, 1)
         assertThrows(IllegalArgumentException::class.java) {
-            machine.changeTransitionFunction(0, 0, 1, 0)
+            machine.changeTransitionFunction(0, 1, 0, 0)
         }
     }
 
@@ -163,22 +163,22 @@ internal class StateMachineTest {
             val machineA = StateMachine((1..3).toSet(), ('a'..'c').toSet(), 'a', 2).let { machine ->
                 (1..3).zip('a'..'c').forEach {
                     val (input, output) = it
-                    machine.changeTransitionFunction(0, 1, input, output)
-                    machine.changeTransitionFunction(1, 0, input, output)
+                    machine.changeTransitionFunction(0, input, 1, output)
+                    machine.changeTransitionFunction(1, input, 0, output)
                 }
             }
             val machineB = StateMachine((1..3).toSet(), ('a'..'c').toSet(), 'a', 2).let { machine ->
                 (1..3).zip('a'..'c').forEach {
                     val (input, output) = it
-                    machine.changeTransitionFunction(0, 1, input, output)
-                    machine.changeTransitionFunction(1, 0, input, output)
+                    machine.changeTransitionFunction(0, input, 1, output)
+                    machine.changeTransitionFunction(1, input, 0, output)
                 }
             }
             val machineC = StateMachine((1..3).toSet(), ('a'..'c').toSet(), 'a', 2).let { machine ->
                 (1..3).zip('a'..'c').forEach {
                     val (input, output) = it
-                    machine.changeTransitionFunction(0, 1, input, output)
-                    machine.changeTransitionFunction(1, 0, input, output)
+                    machine.changeTransitionFunction(0, input, 1, output)
+                    machine.changeTransitionFunction(1, input, 0, output)
                 }
             }
             assertTrue(machineA == machineA)    // Reflexivity
@@ -201,8 +201,8 @@ internal class StateMachineTest {
     fun given_copyOfStateMachine_when_callingDeepCopyConstructor_then_copyIsEqualToOriginal() {
         val getMachine = {
             StateMachine(setOf(1, 3, 4), setOf('a', 'c', 'd'), 'c', 3).apply {
-                changeTransitionFunction(0, 0, 4, 'c')
-                changeTransitionFunction(0, 2, 1, 'a')
+                changeTransitionFunction(0, 4, 0, 'c')
+                changeTransitionFunction(0, 1, 2, 'a')
             }
         }
         val toCopy = getMachine()
@@ -231,12 +231,12 @@ internal class StateMachineTest {
     fun when_callingGetAdjacent_then_returnsAdjacentStates() {
         val machine = StateMachine(setOf(1, 2), setOf(1), 1, 3).apply {
             val output = 1
-            changeTransitionFunction(0, 0, 1, output)
-            changeTransitionFunction(0, 0, 2, output)
-            changeTransitionFunction(1, 0, 1, output)
+            changeTransitionFunction(0, 1, 0, output)
+            changeTransitionFunction(0, 2, 0, output)
+            changeTransitionFunction(1, 1, 0, output)
             changeTransitionFunction(1, 2, 2, output)
             changeTransitionFunction(2, 1, 1, output)
-            changeTransitionFunction(2, 1, 2, output)
+            changeTransitionFunction(2, 2, 1, output)
         }
         val expectedNeighborhoods = listOf(setOf(0), setOf(0, 2), setOf(1))
         expectedNeighborhoods.forEachIndexed { i, expectedNeighborhood ->
@@ -264,10 +264,10 @@ internal class StateMachineTest {
     @Test
     fun given_stateMachine_then_nextReturnsExpectedSequence() {
         val machine = StateMachine(setOf(1, 2), setOf('a', 'b'), 'b', 2).apply {
-            changeTransitionFunction(0, 0, 1, 'b')
-            changeTransitionFunction(0, 1, 2, 'a')
-            changeTransitionFunction(1, 1, 2, 'a')
-            changeTransitionFunction(1, 0, 1, 'a')
+            changeTransitionFunction(0, 1, 0, 'b')
+            changeTransitionFunction(0, 2, 1, 'a')
+            changeTransitionFunction(1, 2, 1, 'a')
+            changeTransitionFunction(1, 1, 0, 'a')
         }
         val inputs = listOf(2, 1, 2, 2, 1, 1, 1, 2, 1)
         val expectedOutputs = listOf('b', 'b', 'a', 'a', 'a', 'b', 'b', 'a', 'a')
@@ -283,8 +283,8 @@ internal class StateMachineTest {
         val outputDummy = Dummy(2)
         val runCase = { modifyOriginal: (StateMachine<Dummy, Dummy>) -> Unit ->
             val original = StateMachine(setOf(inputDummy), setOf(outputDummy), outputDummy, 2).apply {
-                changeTransitionFunction(0, 0, inputDummy, outputDummy)
-                changeTransitionFunction(1, 1, inputDummy, outputDummy)
+                changeTransitionFunction(0, inputDummy, 0, outputDummy)
+                changeTransitionFunction(1, inputDummy, 1, outputDummy)
             }
             val copy = StateMachine(original, setOf(inputDummy.copy()), setOf(outputDummy.copy()))
             modifyOriginal(original)
@@ -293,6 +293,6 @@ internal class StateMachineTest {
 
         runCase { inputDummy.v += 1 }
         runCase { outputDummy.v += 1 }
-        runCase { it.changeTransitionFunction(0, 1, inputDummy, outputDummy) }
+        runCase { it.changeTransitionFunction(0, inputDummy, 1, outputDummy) }
     }
 }

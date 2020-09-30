@@ -2,7 +2,6 @@ package main
 
 import main.PrisonersDilemma.Decision.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
 import kotlin.test.assertEquals
 
 class PrisonerTest {
@@ -16,12 +15,12 @@ class PrisonerTest {
     @Test
     fun given_prisoner_then_nextReturnsCorrect() {
         val prisoner = Prisoner(DEFECT, 3).apply {
-            changeTransitionFunction(0, 1, COOP, COOP)
-            changeTransitionFunction(0, 0, DEFECT, DEFECT)
-            changeTransitionFunction(1, 2, COOP, COOP)
-            changeTransitionFunction(1, 0, DEFECT, DEFECT)
-            changeTransitionFunction(2, 2, COOP, DEFECT)
-            changeTransitionFunction(2, 0, DEFECT, DEFECT)
+            changeTransitionFunction(0, COOP, 1, COOP)
+            changeTransitionFunction(0, DEFECT, 0, DEFECT)
+            changeTransitionFunction(1, COOP, 2, COOP)
+            changeTransitionFunction(1, DEFECT, 0, DEFECT)
+            changeTransitionFunction(2, COOP, 2, DEFECT)
+            changeTransitionFunction(2, DEFECT, 0, DEFECT)
         }
         val inputsAndOutputs = listOf(null to DEFECT, COOP to COOP, COOP to COOP, COOP to DEFECT, COOP to DEFECT,
             DEFECT to DEFECT, DEFECT to DEFECT, COOP to COOP)

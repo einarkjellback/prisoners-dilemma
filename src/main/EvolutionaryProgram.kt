@@ -87,22 +87,37 @@ class EvolutionaryProgram(
         }
 
         fun getForgiving(): Prisoner {
-            TODO("Not yet implemented")
+            return Prisoner(COOP, 3).apply {
+                changeTransitionFunction(0, COOP, 0, COOP)
+                changeTransitionFunction(0, DEFECT, 2, DEFECT)
+                changeTransitionFunction(1, COOP, 0, DEFECT)
+                changeTransitionFunction(1, DEFECT, 2, DEFECT)
+                changeTransitionFunction(2, COOP, 1, DEFECT)
+                changeTransitionFunction(2, DEFECT, 2, DEFECT)
+            }
         }
 
         fun getPunishing(): Prisoner {
-            TODO("Not yet implemented")
+            return Prisoner(COOP, 2).apply {
+                changeTransitionFunction(0, COOP, 0, COOP)
+                changeTransitionFunction(0, DEFECT, 1, DEFECT)
+                changeTransitionFunction(1, COOP, 1, DEFECT)
+                changeTransitionFunction(1, DEFECT, 1, DEFECT)
+            }
         }
 
         fun getTitForTat(): Prisoner {
             return Prisoner(COOP, 1).apply {
-                changeTransitionFunction(0, 0, COOP, COOP)
-                changeTransitionFunction(0, 0, DEFECT, DEFECT)
+                changeTransitionFunction(0, COOP, 0, COOP)
+                changeTransitionFunction(0, DEFECT, 0, DEFECT)
             }
         }
 
         fun getAlwaysDefect(): Prisoner {
-            TODO("Not yet implemented")
+            return Prisoner(DEFECT, 1).apply {
+                changeTransitionFunction(0, COOP, 0, DEFECT)
+                changeTransitionFunction(0, DEFECT, 0, DEFECT)
+            }
         }
     }
 }
