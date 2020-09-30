@@ -1,13 +1,9 @@
 import org.junit.jupiter.api.Test
 import junitparams.JUnitParamsRunner
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.junit.runner.RunWith
 import PrisonersDilemma.*
-import PrisonersDilemma.Companion.getAlwaysCoop
-import PrisonersDilemma.Companion.getAlwaysDefect
-import PrisonersDilemma.Companion.getTitForTat
 import PrisonersDilemma.Decision.*
 import io.mockk.*
 import java.lang.IllegalArgumentException
@@ -22,10 +18,10 @@ internal class EvolutionaryProgramTest {
     @Test
     fun populationIsInitialPopulationAtGenerationZero() {
         // fail("Not implemented")
-        val stateMachineMock = mockk<StateMachine<Decision, Decision>>()
-        val expectedStrategies = (1..3).map { stateMachineMock }.toMutableList()
-        val ep = EvolutionaryProgram(prisonersDilemma = PrisonersDilemma(), initialPopulation = expectedStrategies)
-        assertEquals(expectedStrategies, ep.initialPopulation)
+        val prisonerMock = mockk<Prisoner>()
+        val expectedPrisoners = (1..3).map { prisonerMock }.toMutableList()
+        val ep = EvolutionaryProgram(prisonersDilemma = PrisonersDilemma(), initialPopulation = expectedPrisoners)
+        assertEquals(expectedPrisoners, ep.initialPopulation)
     }
 
     @Test
@@ -57,7 +53,7 @@ internal class EvolutionaryProgramTest {
             (1..5).forEach { childrenPerParent ->
                 val epSpy = spyk(EvolutionaryProgram(
                     initialPopulation = (1..populationSize)
-                        .map { mockk<StateMachine<Decision, Decision>>() }
+                        .map { mockk<Prisoner>() }
                         .toMutableList(),
                     prisonersDilemma = dilemmaMock,
                     childrenPerParent = childrenPerParent
@@ -91,16 +87,16 @@ internal class EvolutionaryProgramTest {
     fun childDifferentFromParentAfterMutation() {
         val dilemmaMock = mockk<PrisonersDilemma>()
         every { dilemmaMock.runGame(any(), any()) } returns Pair(0.0, 0.0)
-        val strategy = StateMachine(values().toSet(), values().toSet(), COOP, 2)
+        val prisoner = Prisoner(COOP, 2)
         (1..25).forEach { _ ->
             val epSpy = spyk(EvolutionaryProgram(
                 prisonersDilemma = dilemmaMock,
-                initialPopulation = mutableListOf(strategy)
+                initialPopulation = mutableListOf(prisoner)
             ))
             epSpy.evolveGeneration()
-            verify { epSpy.mutate(strategy) }
-            val mutatedStrategy = epSpy.mutate(strategy)
-            assertNotEquals(strategy, mutatedStrategy)
+            verify { epSpy.mutate(prisoner) }
+            val mutatedStrategy = epSpy.mutate(prisoner)
+            assertNotEquals(prisoner, mutatedStrategy)
         }
     }
 
@@ -115,5 +111,10 @@ internal class EvolutionaryProgramTest {
             ep.prisonersDilemma.runGame(any(), any())
             ep.trimPop()
         }
+    }
+
+    @Test
+    fun given_initPopulationList_when_constructing_then_cannotManipulateInitPopulationFromOutside() {
+        fail("Not implemented")
     }
 }

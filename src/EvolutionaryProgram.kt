@@ -1,17 +1,15 @@
-import PrisonersDilemma.*
 import PrisonersDilemma.Decision.*
-import java.lang.IllegalArgumentException
 
 class EvolutionaryProgram(
     val populationSize: Int = 5,
     var childrenPerParent: Int = 1,
-    var initialPopulation: MutableList<StateMachine<Decision, Decision>> = mutableListOf(),
+    var initialPopulation: MutableList<Prisoner> = mutableListOf(),
     var prisonersDilemma: PrisonersDilemma,
     var maxFstStates: Int = 10
 ) {
     init {
-        if (childrenPerParent < 1) throw IllegalArgumentException("childrenPerParent must be positive")
-        if (populationSize < 1) throw IllegalArgumentException("populationSize must be positive")
+        require(childrenPerParent >= 1) { "childrenPerParent must be positive" }
+        require(populationSize >= 1) { "populationSize must be positive" }
         initialPopulation = initialPopulation.toMutableList()
     }
 
@@ -27,57 +25,44 @@ class EvolutionaryProgram(
         val mutatedPopulation = mutatePop()
         val populationAndFitnessPairs = (population + mutatedPopulation).map { Pair(it, 0.0) }.toMutableList()
         for (i in 0 until populationAndFitnessPairs.size - 1) {
-            val (stateMachineA, accFitnessA) = populationAndFitnessPairs[i]
-            val strategyA = castToStrategy(stateMachineA)
+            val (prisonerA, accFitnessA) = populationAndFitnessPairs[i]
             for (j in i + 1 until populationAndFitnessPairs.size) {
-                val (stateMachineB, accFitnessB) = populationAndFitnessPairs[j]
-                val strategyB = castToStrategy(stateMachineB)
-                val (fitnessA, fitnessB) = prisonersDilemma.runGame(strategyA, strategyB)
-                populationAndFitnessPairs[i] = Pair(stateMachineA, accFitnessA + fitnessA)
-                populationAndFitnessPairs[j] = Pair(stateMachineB, accFitnessB + fitnessB)
+                val (prisonerB, accFitnessB) = populationAndFitnessPairs[j]
+                val (fitnessA, fitnessB) = prisonersDilemma.runGame(prisonerA, prisonerB)
+                populationAndFitnessPairs[i] = Pair(prisonerA, accFitnessA + fitnessA)
+                populationAndFitnessPairs[j] = Pair(prisonerB, accFitnessB + fitnessB)
             }
         }
         // gatherStatistics(populationAndFitnessPairs)
         // population = selectNextGeneration(populationAndFitnessPairs)
     }
 
-    private fun castToStrategy(machine: StateMachine<Decision, Decision>): Strategy {
-        return object : Strategy {
-            val m = machine
-            override fun next(decision: Decision?): Decision {
-                return if (decision == null) m.getFirstOutput() else m.next(decision)
-            }
-
-        }
-    }
-
     private fun gatherStatistics(
-        populationAndFitnessPairs: MutableList<Pair<StateMachine<Decision, Decision>, Double>>) {
+        populationAndFitnessPairs: MutableList<Pair<Prisoner, Double>>) {
         TODO("Not yet implemented")
     }
 
     private fun selectNextGeneration(
-        populationAndFitnesses: MutableList<Pair<StateMachine<Decision, Decision>, Double>>)
-            : MutableList<StateMachine<Decision, Decision>> {
+        populationAndFitnesses: MutableList<Pair<Prisoner, Double>>) : MutableList<Prisoner> {
         TODO("Not yet implemented")
     }
 
-    internal fun mutate(strategy: StateMachine<Decision, Decision>): StateMachine<Decision, Decision> {
-        if (strategy.initOutput == COOP) {
-            strategy.initOutput = DEFECT
+    internal fun mutate(prisoner: Prisoner): Prisoner {
+        if (prisoner.initOutput == COOP) {
+            prisoner.initOutput = DEFECT
         } else {
-            strategy.initOutput = COOP
+            prisoner.initOutput = COOP
         }
-        return strategy
+        return prisoner
     }
 
-    private fun initializePopulation(): MutableList<StateMachine<Decision, Decision>> {
+    private fun initializePopulation(): MutableList<Prisoner> {
         TODO("Not yet implemented")
     }
 
-    fun mutatePop(): List<StateMachine<Decision, Decision>> {
-        val mutated = mutableListOf<StateMachine<Decision, Decision>>()
-        (1..childrenPerParent).forEach { _ -> mutated += population.map { mutate(it.copy()) } }
+    fun mutatePop(): List<Prisoner> {
+        val mutated = mutableListOf<Prisoner>()
+//        (1..childrenPerParent).forEach { _ -> mutated += population.map { mutate(Prisoner(it)) } }
         return mutated
     }
 
@@ -90,9 +75,34 @@ class EvolutionaryProgram(
     }
 
     companion object {
-        fun getStrategyMachines(): StateMachine<Decision, Decision> {
+        fun getStrategyMachines(): List<Prisoner> {
+            return listOf(
+                getAlwaysCoop(),
+                getAlwaysDefect(),
+                getTitForTat(),
+                getPunishing(),
+                getForgiving()
+            )
+        }
+
+        fun getForgiving(): Prisoner {
             TODO("Not yet implemented")
         }
 
+        fun getPunishing(): Prisoner {
+            TODO("Not yet implemented")
+        }
+
+        fun getTitForTat(): Prisoner {
+            TODO("Not yet implemented")
+        }
+
+        fun getAlwaysDefect(): Prisoner {
+            TODO("Not yet implemented")
+        }
+
+        fun getAlwaysCoop(): Prisoner {
+            TODO("Not yet implemented")
+        }
     }
 }
