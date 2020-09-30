@@ -1,6 +1,6 @@
 import java.lang.IllegalArgumentException
-import java.lang.RuntimeException
 import java.util.*
+import kotlin.reflect.typeOf
 
 /**
  * This class represents a finite state transducer according to it's mathematical definition, which is a six-tuple
@@ -8,35 +8,26 @@ import java.util.*
  * transition function, and an output function.
  */
 open class StateMachine<I, O>(
-    val inputSet: Set<I>,
-    val outputSet: Set<O>,
+    inputSet: Set<I>,
+    outputSet: Set<O>,
     var initOutput: O,
     private var nStates: Int
-) : Cloneable {
+) {
     init {
-        when {
-            inputSet.isEmpty() -> {
-                throw IllegalArgumentException("Empty input set")
-            }
-            outputSet.isEmpty() -> {
-                throw IllegalArgumentException("Empty output set")
-            }
-            (initOutput in outputSet).not() -> {
-                throw IllegalArgumentException("Initial output not in output set")
-            }
-            nStates <= 0 -> {
-                throw IllegalArgumentException("Number of states must be a positive number")
-            }
-        }
+        require(inputSet.isNotEmpty()) { "Empty input set" }
+        require(outputSet.isNotEmpty()) { "Empty output set" }
+        require(initOutput in outputSet) { "Initial output not in output set" }
+        require(nStates > 0) { "Number of states must be a positive number" }
     }
 
-    private var currentState = 0
+    val inputSet = inputSet.toSet()
+    val outputSet = outputSet.toSet()
+    private val startState = 0
+    private var currentState = startState
     private var calledGetFirstOutputOrNext = false
 
-    /*
-     * Usage: transitionFunction[fromState][onInput] gives Pair(toState, output)
-     */
-    private var transitionFunction: List<MutableMap<I, Pair<Int, O>>> = List(nStates) { fromState ->
+    // Usage: transitionFunction[fromState][onInput] gives Pair(toState, output)
+    private val transitionFunction = List(nStates) { fromState ->
         inputSet
             .map {
                 val toState = if (fromState == nStates - 1) 0 else fromState + 1
@@ -46,9 +37,32 @@ open class StateMachine<I, O>(
             .toMutableMap()
     }
 
-    private val START_STATE = 0
+    /**
+     * Returns a state machine with the same transition function as the argument. The input and output values are taken
+     * from the inputSetCopy and outputSetCopy of stateMachine. This constructor is used for generating deep copies,
+     * but only returns one if the elements in inputSetCopy and outputSetCopy does not share reference with
+     * stateMachine's inputSet and outputSet.
+     * @throws IllegalArgumentException if inputSetCopy unequal to original inputSet or outputSetCopy unequal to
+     * original outputSet.
+     */
+    constructor(stateMachine: StateMachine<I, O>, inputSetCopy: Set<I>, outputSetCopy: Set<O>) :
+    this(
+        inputSetCopy.toSet(),
+        outputSetCopy.toSet(),
+        outputSetCopy.find { stateMachine.initOutput == it }
+            ?: throw IllegalArgumentException("outputSetCopy unequal to original outputSet."),
+        stateMachine.nStates) {
 
-    //------------------------------------------------------------------------------------------------------------------
+        require(stateMachine.inputSet == inputSetCopy) { "inputSetCopy unequal to original inputSet." }
+        require(stateMachine.outputSet.containsAll(outputSetCopy)) { "outputSetCopy unequal to original outputSet." }
+
+        (0 until nStates).forEach { fromState ->
+            inputSetCopy.forEach {
+                val (toState, output) = stateMachine.transitionFunction[fromState].getValue(it)
+                changeTransitionFunction(fromState, toState, it, output)
+            }
+        }
+    }
 
     fun changeTransitionFunction(fromState: Int, toState: Int, onInput: I, output: O) {
         require(fromState in 0 until nStates && toState in 0 until nStates) { "State index out of bounds" }
@@ -73,12 +87,6 @@ open class StateMachine<I, O>(
         return initOutput
     }
 
-    override fun clone(): StateMachine<I, O> {
-        return StateMachine(inputSet, outputSet, initOutput, nStates).also {
-            it.transitionFunction = this.transitionFunction
-        }
-    }
-
     override fun hashCode(): Int {
         return Objects.hash(inputSet, outputSet, initOutput, nStates, transitionFunction)
     }
@@ -90,13 +98,12 @@ open class StateMachine<I, O>(
                 && outputSet == other.outputSet
                 && initOutput == other.initOutput
                 && transitionFunction == other.transitionFunction
-
     }
 
-    fun getAdjacent(current: Int): Set<Int> {
+    fun getAdjacent(atState: Int): Set<Int> {
         val neighborhood = mutableSetOf<Int>()
         inputSet.forEach {
-            neighborhood.add(transitionFunction[current][it]!!.first)
+            neighborhood.add(transitionFunction[atState][it]!!.first)
         }
         return neighborhood
     }

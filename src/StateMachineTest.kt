@@ -2,6 +2,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import java.lang.IllegalArgumentException
 
 internal class StateMachineTest {
@@ -196,14 +197,15 @@ internal class StateMachineTest {
     }
 
     @Test
-    fun given_copyOfStateMachine_then_copyIsEqualToOriginal() {
+    fun given_copyOfStateMachine_when_callingDeepCopyConstructor_then_copyIsEqualToOriginal() {
         val getMachine = {
             StateMachine(setOf(1, 3, 4), setOf('a', 'c', 'd'), 'c', 3).apply {
                 changeTransitionFunction(0, 0, 4, 'c')
                 changeTransitionFunction(0, 2, 1, 'a')
             }
         }
-        assertEquals(getMachine(), getMachine().copy())
+        val toCopy = getMachine()
+        assertEquals(toCopy, StateMachine(toCopy, toCopy.inputSet, toCopy.outputSet))
     }
 
     @Test
@@ -271,5 +273,25 @@ internal class StateMachineTest {
         inputs.zip(expectedOutputs).forEach { (input, expectedOutput) ->
             assertEquals(expectedOutput, machine.next(input))
         }
+    }
+
+    @Test
+    fun given_copy_then_originalAndCopyIndependent() {
+        data class Dummy(var v: Int)
+        val inputDummy = Dummy(1)
+        val outputDummy = Dummy(2)
+        val runCase = { modifyOriginal: (StateMachine<Dummy, Dummy>) -> Unit ->
+            val original = StateMachine(setOf(inputDummy), setOf(outputDummy), outputDummy, 2).apply {
+                changeTransitionFunction(0, 0, inputDummy, outputDummy)
+                changeTransitionFunction(1, 1, inputDummy, outputDummy)
+            }
+            val copy = StateMachine(original, setOf(inputDummy.copy()), setOf(outputDummy.copy()))
+            modifyOriginal(original)
+            assertNotEquals(original, copy)
+        }
+
+        runCase { inputDummy.v += 1 }
+        runCase { outputDummy.v += 1 }
+        runCase { it.changeTransitionFunction(0, 1, inputDummy, outputDummy) }
     }
 }
