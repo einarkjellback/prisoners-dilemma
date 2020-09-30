@@ -1,4 +1,6 @@
-import PrisonersDilemma.*
+package main
+
+import main.PrisonersDilemma.*
 
 class Prisoner(initOutput: Decision, nStates: Int)
     : StateMachine<Decision, Decision>(
@@ -7,6 +9,7 @@ class Prisoner(initOutput: Decision, nStates: Int)
     initOutput = initOutput,
     nStates = nStates)
     , Strategy {
+
     override fun next(decision: Decision?): Decision {
         TODO("Not yet implemented")
     }

@@ -1,8 +1,9 @@
+package main
+
 import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
 import java.lang.IllegalArgumentException
 
 internal class StateMachineTest {

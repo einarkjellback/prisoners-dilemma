@@ -5,8 +5,8 @@ prisoner's dilemma.
 
 ## Introduction & Background
 
-### Definition of the Repeated Prisoner's Dilemma game
-The Prisoner's dilemma is a popular game used and studied in game theory. It works as follows: Two prisoner's are
+### Definition of the Repeated main.Prisoner's Dilemma game
+The main.Prisoner's dilemma is a popular game used and studied in game theory. It works as follows: Two prisoner's are
 interrogated in separate rooms by each the investigator. The investigators have enough evidence to convict the felons 
 for *A* amount of years, however they suspect the criminals have done more than what they can prove. They know they can
 convict the felons of one or both witness against the other. However, they will be granted reduced sentences for
@@ -15,7 +15,7 @@ each receive a sentence of *A* years; (2) if one defects and one cooperates the 
 the cooperating felon receives *C* years; and (3) both defect and receive sentences of *D* years. Usually *B* < *A* <
 *D* < *C*.
 
-In the Repeated Prisoner's Dilemma this is repeated for *x* amount of turns, accumulating sentences and at each turn the
+In the Repeated main.Prisoner's Dilemma this is repeated for *x* amount of turns, accumulating sentences and at each turn the
 felons are informed of the decision of their buddy to defect or cooperate. The goal is to accumulate as low a sentence
 as possible after *x* turns.
 
@@ -42,10 +42,10 @@ We keep s0 constant. This means we should be able to apply heuristics to existin
 be using at least one heuristic in this project, possibly expanding it.
 
 ### General layout of the code
-There will be mainly three classes, PrisonersDilemmaSimulation.Kt, responsible for running the Repeated Prisoner's
-Dilemma given two strategies; main.java.StateMachine.Kt, representing the strategies; and [Name of heuristic].Kt, which will be
+There will be mainly three classes, PrisonersDilemmaSimulation.Kt, responsible for running the Repeated main.Prisoner's
+Dilemma given two strategies; main.java.main.StateMachine.Kt, representing the strategies; and [Name of heuristic].Kt, which will be
 responsible for modifying the strategies, keeping scores, and tallying strategies against each other by calling
-main.java.PrisonersDilemma.Kt.
+main.java.main.PrisonersDilemma.Kt.
 
 ### Evolutionary Program as first heuristic
 We will use an Evolutionary Programming (EP) heuristic to develop our strategies. The reasons for this is that (from 

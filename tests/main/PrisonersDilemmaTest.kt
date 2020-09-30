@@ -1,10 +1,12 @@
-import PrisonersDilemma.Companion.getAlwaysCoop
-import PrisonersDilemma.Companion.getAlwaysDefect
-import PrisonersDilemma.Companion.getForgiving
-import PrisonersDilemma.Companion.getPunishing
-import PrisonersDilemma.Companion.getTitForTat
-import PrisonersDilemma.Decision
-import PrisonersDilemma.Decision.*
+package main
+
+import main.PrisonersDilemma.Companion.getAlwaysCoop
+import main.PrisonersDilemma.Companion.getAlwaysDefect
+import main.PrisonersDilemma.Companion.getForgiving
+import main.PrisonersDilemma.Companion.getPunishing
+import main.PrisonersDilemma.Companion.getTitForTat
+import main.PrisonersDilemma.Decision
+import main.PrisonersDilemma.Decision.*
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals

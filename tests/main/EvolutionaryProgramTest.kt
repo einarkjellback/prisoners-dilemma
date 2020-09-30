@@ -1,10 +1,11 @@
+package main
+
 import org.junit.jupiter.api.Test
 import junitparams.JUnitParamsRunner
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.junit.runner.RunWith
-import PrisonersDilemma.*
-import PrisonersDilemma.Decision.*
+import main.PrisonersDilemma.Decision.*
 import io.mockk.*
 import java.lang.IllegalArgumentException
 import kotlin.test.assertEquals
@@ -89,10 +90,12 @@ internal class EvolutionaryProgramTest {
         every { dilemmaMock.runGame(any(), any()) } returns Pair(0.0, 0.0)
         val prisoner = Prisoner(COOP, 2)
         (1..25).forEach { _ ->
-            val epSpy = spyk(EvolutionaryProgram(
+            val epSpy = spyk(
+                EvolutionaryProgram(
                 prisonersDilemma = dilemmaMock,
                 initialPopulation = mutableListOf(prisoner)
-            ))
+            )
+            )
             epSpy.evolveGeneration()
             verify { epSpy.mutate(prisoner) }
             val mutatedStrategy = epSpy.mutate(prisoner)
