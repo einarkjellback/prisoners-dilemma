@@ -77,9 +77,8 @@ class EvolutionaryProgram(
     }
 
     companion object {
-        fun getStrategyMachines(): List<Prisoner> {
+        fun getPrisoners(): List<Prisoner> {
             return listOf(
-                getAlwaysCoop(),
                 getAlwaysDefect(),
                 getTitForTat(),
                 getPunishing(),
@@ -96,14 +95,13 @@ class EvolutionaryProgram(
         }
 
         fun getTitForTat(): Prisoner {
-            TODO("Not yet implemented")
+            return Prisoner(COOP, 1).apply {
+                changeTransitionFunction(0, 0, COOP, COOP)
+                changeTransitionFunction(0, 0, DEFECT, DEFECT)
+            }
         }
 
         fun getAlwaysDefect(): Prisoner {
-            TODO("Not yet implemented")
-        }
-
-        fun getAlwaysCoop(): Prisoner {
             TODO("Not yet implemented")
         }
     }

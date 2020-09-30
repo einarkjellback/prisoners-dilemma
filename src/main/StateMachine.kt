@@ -72,7 +72,7 @@ open class StateMachine<I, O>(
         transitionFunction[fromState][onInput] = Pair(toState, output)
     }
 
-    fun next(input: I): O {
+    fun transition(input: I): O {
         require(input in inputSet) { "Input outside input set" }
         if (!calledGetFirstOutputOrNext) {
             return getFirstOutput()

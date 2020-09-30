@@ -118,6 +118,31 @@ internal class EvolutionaryProgramTest {
 
     @Test
     fun given_initPopulationList_when_constructing_then_cannotManipulateInitPopulationFromOutside() {
-        fail("Not implemented")
+        fail("Not yet implemented")
+    }
+
+    @Test
+    fun testTitForTat() {
+        val titForTatToTest = EvolutionaryProgram.getTitForTat()
+        val titForTatCorrect = PrisonersDilemma.getTitForTat()
+        val randomInputs = listOf(null) + List(30) { listOf(COOP, DEFECT).random() }
+        randomInputs.forEach {
+            assertEquals(titForTatCorrect.next(it), titForTatToTest.next(it))
+        }
+    }
+
+    @Test
+    fun testForgiving() {
+        fail("Not yet implemented")
+    }
+
+    @Test
+    fun testPunishing() {
+        fail("Not yet implemented")
+    }
+
+    @Test
+    fun testAlwaysDefect() {
+        fail("Not yet implemented")
     }
 }

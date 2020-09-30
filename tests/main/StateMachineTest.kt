@@ -83,7 +83,7 @@ internal class StateMachineTest {
         }
         assertThrows(IllegalStateException::class.java) {
             val machine = getMachine()
-            machine.next(1)
+            machine.transition(1)
             machine.getFirstOutput()
         }
     }
@@ -115,7 +115,7 @@ internal class StateMachineTest {
     fun given_inputNotInInputSet_when_nextCalled_then_throwIAException() {
         val machine = StateMachine(setOf(1), setOf(1), 1, 1)
         assertThrows(IllegalArgumentException::class.java) {
-            machine.next(0)
+            machine.transition(0)
         }
     }
 
@@ -257,7 +257,7 @@ internal class StateMachineTest {
         val machine = spyk(StateMachine(setOf(0), setOf(1, 2), initOutput, 1).apply {
             changeTransitionFunction(0, 0, 0, 1)
         })
-        assertEquals(initOutput, machine.next(0))
+        assertEquals(initOutput, machine.transition(0))
         verify { machine.getFirstOutput() }
     }
 
@@ -272,7 +272,7 @@ internal class StateMachineTest {
         val inputs = listOf(2, 1, 2, 2, 1, 1, 1, 2, 1)
         val expectedOutputs = listOf('b', 'b', 'a', 'a', 'a', 'b', 'b', 'a', 'a')
         inputs.zip(expectedOutputs).forEach { (input, expectedOutput) ->
-            assertEquals(expectedOutput, machine.next(input))
+            assertEquals(expectedOutput, machine.transition(input))
         }
     }
 

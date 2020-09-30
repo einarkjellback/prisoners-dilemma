@@ -101,7 +101,7 @@ internal class PrisonersDilemmaTest {
             Pair(DEFECT, COOP) to Pair(0.0001, 0.0002)
         ))
 
-        val randomStrategy = mockk<Strategy>()
+        val randomStrategy = mockk<PrisonersDilemma.Strategy>()
         val randomOutput = List(iterations) { listOf(COOP, DEFECT).random() }
         every { randomStrategy.next(null) } returns randomOutput.first()
         every { randomStrategy.next(any()) } returnsMany randomOutput.drop(1)
