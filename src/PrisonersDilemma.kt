@@ -15,7 +15,7 @@ class PrisonersDilemma(
         require(iterations > 0) { "Non-positive number of iterations" }
         val requiredKeys = listOf(Pair(COOP, COOP), Pair(COOP, DEFECT), Pair(DEFECT, COOP), Pair(DEFECT, DEFECT))
         requiredKeys.forEach {
-            require(penaltyMatrix.containsKey(it)) { "penaltyMatrix does not contain key $it" }
+            require(penaltyMatrix.containsKey(it)) { "penaltyMatrix does not contain required key $it" }
         }
     }
 
@@ -40,7 +40,6 @@ class PrisonersDilemma(
     }
 
     companion object {
-
         fun getStrategies(): Set<Strategy> {
             return setOf(getAlwaysCoop(), getAlwaysDefect(), getTitForTat(), getPunishing(), getForgiving())
         }
@@ -90,5 +89,9 @@ class PrisonersDilemma(
 
     enum class Decision {
         COOP, DEFECT
+    }
+
+    fun interface Strategy {
+        fun next(decision: Decision?): Decision
     }
 }
